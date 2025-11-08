@@ -2,19 +2,9 @@
 #define RECEIVER_HANDLER_H
 
 /*
- * PSEUDOCODE:
- * 
- * HEADER FILE: receiver_handler.h
- * PURPOSE: Define interface for receiving handler
- * 
- * IFNDEF RECEIVER_HANDLER_H
- * DEFINE RECEIVER_HANDLER_H
- * 
- * DECLARE:
- *     FUNCTION receiver_handler(void *arg) RETURNS void*
- *     // Function to start the receiving handler thread
- * 
- * ENDIF
+ * Header file for message receiver module.
+ * Defines interface for handling incoming server messages in separate thread.
+ * Manages real-time message display and server command processing.
  */
 
 // Function to start the receiving handler thread
