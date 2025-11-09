@@ -19,25 +19,31 @@ only need a little tweaking as a result of debugging.
 #include <string.h>
 #include <unistd.h>
 
-extern void *talk_to_client(void *arg);
+extern void *sender_main_loop(void *arg);
+extern void *receiver_main_loop(void *arg);
 
 int main() {
-    // Load server properties
-    Properties* props = property_read_properties("server.properties");
+    // Load client properties
+    Properties* props = property_read_properties("client.properties");
 
-    char* portVal = property_get_property(props, "PORT");
+    char* ipVal   = property_get_property(props, "SERVER_IP");
+    char* portVal = property_get_property(props, "SERVER_PORT");
+    char* nameVal = property_get_property(props, "CLIENT_NAME");
+
     int port = atoi(portVal);
 
-    initialize_global_state();
+    initializeClientState(nameVal);
 
-    int listen_fd = create_listening_socket(port);
-    accept_loop(listen_fd);
+    int serverFd = connectToServer(ipVal, port);
 
-    close(listen_fd);
+    startSenderThread(serverFd);
+    startReceiverThread(serverFd);
+
+    waitForThreads();
+    cleanup(serverFd);
+
     return 0;
 }
-
-// aaaaa
 
 int main() {
     loadClientProperties();
@@ -57,13 +63,11 @@ void initializeClientState() {
 }
 
 // start the sending thread
-startSenderThread(int serverFd) {
-    // 
+void startSenderThread(int serverFd) {
 }
 
 // start the receiving thread
-startReceiverThread(int serverFd) {
-    // 
+void startReceiverThread(int serverFd) {
 }
 
 // wait for threads
