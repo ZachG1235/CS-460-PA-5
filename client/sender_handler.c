@@ -29,6 +29,8 @@ void *senderHandler(void *arg)
             // if JOIN command:
                 // format as initial join message
                 // set leave status to false
+                // call connectToServer in main.c
+                // start the receiver thread
             // else if LEAVE command:
                 // format leave message with username
                 // set leave status to true

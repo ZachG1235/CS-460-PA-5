@@ -10,6 +10,7 @@ typedef struct chatNodeStruct{
     int port;
     char name[255];
 } ChatNode;
+
 // Struct *client (linked list)
 // client: head_client
 // *client: next_client_ptr
