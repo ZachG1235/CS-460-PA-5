@@ -5,18 +5,18 @@
 
 //IP, port and logical name
 
-struct ChatNode{
+typedef struct chatNodeStruct{
     char ip[16];
     int port;
     char name[255];
-};
+} ChatNode;
 // Struct *client (linked list)
 // client: head_client
 // *client: next_client_ptr
-struct Client{
+typedef struct clientStruct{
     ChatNode headClient;
     Client *nextClientPtr;
-};
+} Client;
 
 // have code in place that implements linked lists for chat nodes. 
 
