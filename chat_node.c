@@ -9,7 +9,8 @@
 
 
 // add chat node
-int addChatNode(Client *headClient, char ip[], int port, char name[]){
+int addChatNode(Client *headClient, char ip[], int port, char name[])
+{
     // set info into variables
     // add chat node struct
     // check if theres a list
@@ -20,7 +21,8 @@ int addChatNode(Client *headClient, char ip[], int port, char name[]){
         // set struct as head
 }
 // remove chat node
-int removeChatNode(Client *headClient, char ip[], int port){
+int removeChatNode(Client *headClient, char ip[], int port)
+{
     // iterate through client until ip and port are same
     // check if theres only one element (no next node)
         // remove head node
