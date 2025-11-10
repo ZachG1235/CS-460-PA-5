@@ -27,8 +27,7 @@ void *sender_handler(void *arg)
         
         // check input type and format appropriate message:
             // if JOIN command:
-                // if previously left, format as rejoin message
-                // else format as initial join message
+                // format as initial join message
                 // set leave status to false
             // else if LEAVE command:
                 // format leave message with username
