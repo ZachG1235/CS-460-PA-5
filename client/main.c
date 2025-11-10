@@ -1,4 +1,5 @@
 // full code
+#include "client.h"
 
 /* client main file requirements:
 detailed code that is kicking off a client.
@@ -10,68 +11,67 @@ should be fully functional,
 only need a little tweaking as a result of debugging.
 */
 
-#include "properties.h"
-#include "main.h"
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+static pthread_t senderThread;
+static pthread_t receiverThread;
 
 extern void *sender_main_loop(void *arg);
 extern void *receiver_main_loop(void *arg);
 
-int main()
-{
-    // Load client properties
-    Properties* props = property_read_properties("client.properties");
+// connect client to server
+int connectToServer(const char *ip, int port) {
+    // variables
+    int sockfd;
+    struct sockaddr_in serverAddr;
 
-    char* ipVal   = property_get_property(props, "SERVER_IP");
-    char* portVal = property_get_property(props, "SERVER_PORT");
-    char* nameVal = property_get_property(props, "CLIENT_NAME");
+    // create tpc cocket
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("socket"); // print error if cannot
+        return -1;
+    }
 
-    int port = atoi(portVal);
+    // configure server addrtess structure
+    // IPv4
+    serverAddr.sin_family = AF_INET; 
+    //cinvert port
+    serverAddr.sin_port = htons(port);
 
-    initializeClientState(nameVal);
+    // convert ip into binary format
+    if (inet_pton(AF_INET, ip, &serverAddr.sin_addr) <= 0) {
+        perror("inet_pton");
+        close(sockfd);
+        return -1;
+    }
 
-    int serverFd = connectToServer(ipVal, port);
+    // connect :)
+    if (connect(sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+        perror("connect");
+        close(sockfd);
+        return -1;
+    }
 
-    startSenderThread(serverFd);
-    startReceiverThread(serverFd);
-
-    waitForThreads();
-    cleanup(serverFd);
-
-    return 0;
+    // return socket if successful
+    return sockfd;
 }
 
-int main() {
-    loadClientProperties();
-}
+// 
+void *senderFunc(void *arg) {
+    int serverFd = *(int *)arg;   // get socket file descriptor
+    char buffer[1024];            // message buffer
 
-// connect to server
-int connectToServer(const char ip, int port) {
-    // creates tcp socket and connects to server
-    // returns server socket fd
-}
+    while (1) {
+        // Read user input (line-based)
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL)
+            break;
 
-// initialize global state
-void initializeClientState() {
-    // sets up
-        // joined = false
-        // shutting_down = false
-}
+        // If user types "/quit", close the connection
+        if (strncmp(buffer, "/quit", 5) == 0)
+            break;
 
-// start the sending thread
-void startSenderThread(int serverFd) {
-}
+        // Send the message to the server
+        send(serverFd, buffer, strlen(buffer), 0);
+    }
 
-// start the receiving thread
-void startReceiverThread(int serverFd) {
-}
-
-// wait for threads
-void waitForThreads() {
-    // join sender and receiver threads
+    // Gracefully shut down sending side of the socket
+    shutdown(serverFd, SHUT_WR);
+    return NULL;
 }
