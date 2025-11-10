@@ -105,7 +105,8 @@ void acceptLoop(int listenSocketFileDesc)
         pthread_t tid;
         int* arg = malloc(seizeof(int));
         *arg = clientFileDesc;
-        pthread_create(&tid, NULL, (void* (*)(void*))handleIncomingMessage, arg);
+        pthread_create(&tid, NULL, (void* (*)(void*))handleIncomingMessage, 
+                                                                           arg);
         pthread_detach(tid);
 
         close(clientFileDesc);
