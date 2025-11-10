@@ -1,7 +1,7 @@
 #ifndef message_h
 #define message_h
 
-// additional libraries
+/* additional libraries */
 #include <unistd.h>
 
 /* ===== data types ===== */
