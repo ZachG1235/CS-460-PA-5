@@ -15,6 +15,7 @@
     // client struct: holds client sending message (client struct)
     // message content: holds the string of a message (char array)
 
+
 /* ===== function prototypes ===== */
 
 /* 
