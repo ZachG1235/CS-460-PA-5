@@ -22,7 +22,8 @@ only need a little tweaking as a result of debugging.
 extern void *sender_main_loop(void *arg);
 extern void *receiver_main_loop(void *arg);
 
-int main() {
+int main()
+{
     // Load client properties
     Properties* props = property_read_properties("client.properties");
 

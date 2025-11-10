@@ -10,7 +10,7 @@
  * Manages chat session state and protocol commands.
  * Returns NULL on completion.
 */
-void *sender_handler(void *arg) 
+void *senderHandler(void *arg) 
 {
     // initialize variables
         // input buffer for user input

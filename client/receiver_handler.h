@@ -8,6 +8,6 @@
  */
 
 // Function to start the receiving handler thread
-void *receiver_handler(void *arg);
+void *receiverHandler(void *arg);
 
 #endif

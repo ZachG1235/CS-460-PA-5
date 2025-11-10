@@ -11,7 +11,7 @@
  * Manages connection state and handles server commands.
  * Returns NULL on completion.
 */
-void *receiver_handler(void *arg) 
+void *receiverHandler(void *arg) 
 {
     // initialize variables
         // buffer for incoming data
