@@ -52,16 +52,49 @@ void handleClient(MessageStruct messageToHandle, int socket, Client *headPtr)
     }
 }
 
+int countClients(Client* headPtr)
+{
+    int count = 0;
+    Client* curPtr = headPtr;
+    while (curPtr != NULL) {
+        count++;
+        curPtr = curPtr->nextClientPtr;
+    }
+    return count;
+}
+
 // messages all clients a message
 void messageAllClients(Client *headPtr, MessageStruct messageToSend)
 {
     Client *curPtr = headPtr;
-
+    int threadCount = countClients(headPtr);
+    pthread_t threads[threadCount];
+    int curThreadIndex = 0;
     while (curPtr != NULL)
     {
-        int currentSocket = curPtr.socket // need to hold socket in client list
-        sendMessage(currentSocket, &messageToSend, sizeof(messageToSend));
+        // malloc the struct (it's going to be free'd in the thread)
+        MessageStruct *threadMsgArg = malloc(sizeof(MessageStruct))
+
+        // copy over information in struct
+            // TODO: Not confident here. Please look over copying.
+        threadMsgArg->msgType = msgToSend.msgType;
+        threadMsgArg->senderInfo = msgToSend.senderInfo;
+        copyString(threadMsgArg->senderInfo.ip, msgToSend.senderInfo.ip);
+        copyString(threadMsgArg->senderInfo.port, msgToSend.senderInfo.port);
+        copyString(threadMsgArg->senderInfo.name, msgToSend.senderInfo.name);
+        copyString(threadMsgArg->msgContent, msgToSend.msgContent)
+
+
+        pthread_create(&threads[curThreadIndex], NULL, sendOnThread, &msgToSend);
+        curThreadIndex += 1;
+        
         curPtr = curPtr->nextClientPtr;
+    }
+
+    // wait for threads to finish
+    for (int i = 0; i < threadCount; i++)
+    {
+        pthread_join(threads[i], NULL)
     }
 }
 
@@ -69,16 +102,69 @@ void messageAllClients(Client *headPtr, MessageStruct messageToSend)
 void messageAllClientsExcept(Client *headPtr, MessageStruct msgToSend, char avoidIP[20], char avoidPort[8])
 {
     Client *curPtr = headPtr;
-
+    int threadCount = countClients(headPtr);
+    pthread_t threads[threadCount];
+    int curThreadIndex = 0;
     while (curPtr != NULL)
     {
-        int currentSocket = curPtr.socket // need to hold socket in client list
         if ( !(compareString(curPtr->headClient.ip, avoidIP) == 0 &&
                compareString(curPtr->headClient.port, avoidPort) == 0) )
         {
-            sendMessage(currentSocket, &messageToSend, sizeof(messageToSend));
+            // malloc the struct (it's going to be free'd in the thread)
+            MessageStruct *threadMsgArg = malloc(sizeof(MessageStruct))
+
+            // copy over information in struct
+                // TODO: Not confident here. Please look over copying.
+            threadMsgArg->msgType = msgToSend.msgType;
+            threadMsgArg->senderInfo = msgToSend.senderInfo;
+            copyString(threadMsgArg->senderInfo.ip, msgToSend.senderInfo.ip);
+            copyString(threadMsgArg->senderInfo.port, msgToSend.senderInfo.port);
+            copyString(threadMsgArg->senderInfo.name, msgToSend.senderInfo.name);
+            copyString(threadMsgArg->msgContent, msgToSend.msgContent)
+
+
+            pthread_create(&threads[curThreadIndex], NULL, sendOnThread, &msgToSend);
+            curThreadIndex += 1;
         }
         
         curPtr = curPtr->nextClientPtr;
     }
+
+    // wait for threads to finish
+    for (int i = 0; i < threadCount; i++)
+    {
+        pthread_join(threads[i], NULL)
+    }
+}
+
+void *sendOnThread(void* arg)
+{
+    MessageStruct* msgToSend = arg;
+
+    int newChatSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (newChatSocket < 0)
+    {
+        perror("socket");
+        return NULL;
+    }
+    struct sockaddr_in clientAddr;
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(atoi(msgToSend->senderInfo.port));
+    inet_pton(AF_INET, msgToSend->senderInfo.ip, &clientAddr.sin_addr);
+
+    if (connect(newChatSocket, (struct sockaddr*)&clientAddr, sizeof(clientAddr)) < 0)
+    {
+        perror("connect");
+        close(newChatSocket);
+        return NULL;
+    }
+
+    sendMessage(newChatSocket, msgToSend, sizeof(MessageStruct));
+
+    close(newChatSocket);
+
+    free(msgToSend);
+
+    return NULL;
+
 }

@@ -106,6 +106,40 @@ void concatenateString( char *destStr, const char *sourceStr)
     free(tempStr);
 }
 
+/*
+Name: copyString
+Process: copies one string into another, 
+         overwriting data in the destination string
+Function Input/Parameters: c-style source string (char *)
+Function Output/Parameters: c-style destination string (char *)
+Function Output/Returned: none
+Device Input/Keyboard: none
+Device Output/Monitor: none
+Dependencies: getStringLength
+*/
+void copyString( char *destStr, const char *sourceStr)
+{
+    // init function/variables
+    int index = 0;
+
+    // check for source/desintation not the same (aliasing)
+    if (destStr != sourceStr)
+    {
+        // loop to end of source string
+        while( sourceStr[index] != NULL_CHAR && index < MAX_STR_LEN)
+        {
+            // assign characters to end of desintation string
+            destStr[index] = sourceStr[index];
+
+            // update index
+            index++;
+
+            // set temporary end of destination string
+            destStr[index] = NULL_CHAR;
+        }
+    }
+    // end loop
+}
 
 /*
 Name: findSubString
@@ -170,6 +204,93 @@ int findSubString(const char *testStr, const char *searchSubStr)
 }
 
 /*
+Name: getStringConstrained
+Process: captures a string from the input stream
+         with various constraints
+Function Input/Parameters: input stream (FILE *)
+                           clears leading non printable (bool),
+                           clears leading space (bool),
+                           stops at non printable (bool),
+                           stops at specified delimiter (char)
+                           Note: consumes delimiter
+Function Output/Parameters: string returned (char *)
+Function Output/Returned: success of operation (bool)
+Device Input/Keyboard: none
+Device Output/Monitor: none
+Dependencies: fgetc
+*/
+bool getStringConstrained(
+                          FILE *inStream,
+                          bool clearLeadingNonPrintable, 
+                          bool clearLeadingSpace,
+                          bool stopAtNonPrintable,
+                          char delimiter, 
+                          char *capturedString
+                         )
+{
+    // init variables
+    int intChar = EOF, index = 0;
+
+    // init output string
+    capturedString[index] = NULL_CHAR;
+
+    // capture first value in stream
+        // function: gfetc
+    intChar = fgetc(inStream);
+
+    // loop to clear nonprintable or space, if indicated
+    while( (intChar != EOF ) 
+            && ( ( clearLeadingNonPrintable && intChar < (int)SPACE )
+                || (clearLeadingSpace && intChar == (int)SPACE) ) )
+    {
+        // get next character
+            // function: fgetc
+        intChar = fgetc(inStream);
+    }
+    // end clear nonprintable/space loop
+
+    //check for end of file found
+    if (intChar == EOF)
+    {
+        // return failed operation
+        return false;
+    }
+
+    // loop to capture input
+    while(    
+            // continue if not at end of file and max string length not reached
+          ( intChar!= EOF && index < MAX_STR_LEN - 1)
+            // AND
+            && 
+            // continue if not printable flag set and characters are printable
+            //    OR continues if not printable flag not set
+          ( (stopAtNonPrintable && intChar >= (int)SPACE)
+             || ( !stopAtNonPrintable ) )
+            // AND
+            && 
+            // continues if specified delimiter is not found
+          ( intChar != (char)delimiter) )
+    {
+        // place character in array element 
+        capturedString[index] = (char)intChar;
+
+        // increment array index
+        index++;
+
+        // set next element to null character / end of c-string
+        capturedString[index] = NULL_CHAR;
+
+        // get next character as integer
+            // function: fgetc
+        intChar = fgetc(inStream);
+    }
+    // end loop
+
+    // return successful operation
+    return true;
+}
+
+/*
 Name: getStringLength
 Process: finds the length of a string
          by counting characters up to the NULL_CHAR character
@@ -196,6 +317,37 @@ int getStringLength(const char *testStr)
 
     // return index/length
     return index; 
+}
+
+/*
+Name: getStringToDelimiter
+Process: captures a string from the input stream
+         to a specified delimiter;
+         Note: consumes delimiter
+Function Input/Parameters: input stream (FILE *)
+                           stops at specified delimiter (char)
+Function Output/Parameters: string returned (char *)
+Function Output/Returned: success of operation (bool)
+Device Input/Keyboard: none
+Device Output/Monitor: none
+Dependencies: getStringConstrained
+*/
+bool getStringToDelimiter( 
+                           FILE *inStream, 
+                           char delimiter, 
+                           char *capturedString
+                         )
+{
+    // call engine function with delimiter
+        // function: getStringConstrained
+    return getStringConstrained(
+                    inStream,           // file stream pointer
+                    true,               // clears leading non printable character
+                    true,               // bool clearLeadingSpace
+                    true,               // stops at non printable
+                    delimiter,          // stops at delimiter
+                    capturedString      // return string
+                                );
 }
 
 /*
