@@ -3,17 +3,31 @@
 
 /* additional libraries */
 #include <unistd.h>
+#include "chat_node.h"
 
 /* ===== data types ===== */
 
 // MessageType enum that can describe each message type (JOIN, LEAVE, ECT.)
+enum MessageType
+{
     // join, leave, shutdown, note 
+    JOIN,
+    LEAVE,
+    SHUTDOWN,
+    NOTE
+};
 
 // message struct that details whats in a message
 // struct MessageStruct
+typedef struct messageStruct
+{
     // message type: holds message type (enum)
+    enum MessageType msgType;
     // client struct: holds client sending message (client struct)
+    Client senderInfo;
     // message content: holds the string of a message (char array)
+    char msgContent[255];
+} MessageStruct;
 
 
 /* ===== function prototypes ===== */
