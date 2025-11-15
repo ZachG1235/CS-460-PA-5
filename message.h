@@ -24,7 +24,7 @@ typedef struct messageStruct
     // message type: holds message type (enum)
     enum MessageType msgType;
     // client struct: holds client sending message (client struct)
-    Client senderInfo;
+    ChatNode senderInfo;
     // message content: holds the string of a message (char array)
     char msgContent[255];
 } MessageStruct;
