@@ -123,7 +123,7 @@ void acceptLoop(int listenSocketFileDesc)
         
         // create a thread to handle the new client
         pthread_t tid;
-        int* arg = malloc(seizeof(int));
+        int* arg = malloc(sizeof(int));
         *arg = clientFileDesc;
 
         // create the actual thread 
