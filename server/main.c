@@ -147,7 +147,7 @@ void handleIncomingMessage(int clientFileDesc)
                                               &msg, sizeof(MessageStruct))) > 0)
     {
         // send message to big switch-case handler
-        handleClient(msg, clientFileDesc);
+        handleClient(msg, clientFileDesc, clientListHead);
     }
 
     // client disconnected or error
