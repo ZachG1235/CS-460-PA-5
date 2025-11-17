@@ -1,6 +1,5 @@
 // NAME - Avnish kumar sinha
 // Further implementation of the receiver handler for the chat client 
-// Date - 10/15/2023
 
 #include "message.h"
 #include "receiver_handler.h"
