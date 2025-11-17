@@ -20,6 +20,7 @@ int main()
 
     // start sender and receiver threads
     startSenderThread(serverFileDesc);
+    startReceiverThread(serverFileDesc);
     printf("You are ready to go!\n");
 
     // wait for both threads to complete
@@ -64,7 +65,7 @@ static int connectToServer(const char *ip, int port)
 
 
 // Launches the sender thread (user command processing)
-static void startSenderThread(int serverFileDesc)
+static int startSenderThread(int serverFileDesc, const char *ip, const char *port)
 {
     // get a ptr to serverFileDesc
     int *senServerFileDescPtr = malloc(sizeof(int));
@@ -75,6 +76,35 @@ static void startSenderThread(int serverFileDesc)
         perror("error: pthread_create(senderThread)");
         exit(EXIT_FAILURE);
     }
+
+    // from connect to server
+    int socketFileDesc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketFileDesc < 0)
+    {
+        perror("error: socket()");
+        return -1;
+    }
+
+    struct sockaddr_in serverAddr;
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+
+    if (inet_pton(AF_INET, ip, &serverAddr.sin_addr) <= 0)
+    {
+        perror("error: inet_pton()");
+        close(socketFileDesc);
+        return -1;
+    }
+
+    if (connect(socketFileDesc, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+    {
+        perror("error: connect()");
+        close(socketFileDesc);
+        return -1;
+    }
+
+    return socketFileDesc;
 }
 
 // Launches the receiver thread (server message handling)
