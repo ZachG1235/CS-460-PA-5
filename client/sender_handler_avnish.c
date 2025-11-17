@@ -1,6 +1,5 @@
-// NAME - Avnish kumar sinha
+// NAME - Avnish Kumar Sinha
 // Further implementation of the sender handler for the chat client
-// Date - 10/15/2023
 
 #include "sender_handler.h"
 #include "main.h"
