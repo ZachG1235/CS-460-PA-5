@@ -1,42 +1,36 @@
 
-// NAME - Avnish
+// receiver_handler.c
+#include "receiver_handler.h"
+#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-// include statements
-#include "message.h"
+extern char *client_name; // declared in main.c
 
-/* ===== function implementation ===== */
-/*
- * Handles incoming messages from server to client. Runs in separate thread
- * to continuously listen for server messages and display them to user.
- * Manages connection state and handles server commands.
- * Returns NULL on completion.
-*/
-void *receiverHandler(void *arg) 
-{
-    // initialize variables
-        // buffer for incoming data
-        // read size variable
-    
-    // while receiving data from server socket
-        // set read size = receive data from server into buffer
-        // if read size > 0:
-            // null-terminate the received string
-            
-            // check for special server commands:
-                // if message is "SHUTDOWN ALL":
-                    // display shutdown notification
-                    // exit program successfully
-            
-            // display received message to user
-            // display prompt for next user input
-            
-        // else if read size == 0:
-            // display "server closed connection"
-            // exit program successfully
-            
-        // else if read size < 0:
-            // exit program with failure
-    
-    // return NULL
+void *receiver_handler(void *arg) {
+    int sockfd = *((int *)arg);
+    char buffer[1024];
+    int read_size;
+
+    while ((read_size = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0) {
+        buffer[read_size] = '\0';
+        if (strcmp(buffer, "SHUTDOWN_ALL") == 0) {
+            printf("[Server] Shutdown command received.\n");
+            exit(EXIT_SUCCESS);
+        }
+        printf("%s\n", buffer);
+        printf("Enter message ('JOIN', 'LEAVE', 'SHUTDOWN', 'SHUTDOWN_ALL' or any message): \n");
+    }
+
+    if (read_size == 0) {
+        printf("Server has closed the connection.\n");
+        exit(EXIT_SUCCESS);
+    } else if (read_size == -1) {
+        exit(EXIT_FAILURE);
+    }
+
+    return NULL;
 }
 

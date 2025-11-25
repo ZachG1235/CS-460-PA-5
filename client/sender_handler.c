@@ -1,53 +1,60 @@
-//NAME - Avnish 
 
-// include statements
 #include "sender_handler.h"
+#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
 
-/* ===== function implementation ===== */
-/*
- * Handles outgoing messages from user to server. Runs in separate thread
- * to continuously process user input and send formatted messages to server.
- * Manages chat session state and protocol commands.
- * Returns NULL on completion.
-*/
-void *senderHandler(void *arg) 
-{
-    // initialize variables
-        // input buffer for user input
-        // output buffer for formatted messages
-        // shutdown flag
-        // leave status flag
-    
-    // while true (continuous input loop)
-        // display prompt for user input
-        // get user input from stdin
-        // if input error, break from loop
-        
-        // remove newline character from input
-        
-        // check input type and format appropriate message:
-            // if JOIN command:
-                // format as initial join message
-                // set leave status to false
-                // call connectToServer in main.c
-                // start the receiver thread
-            // else if LEAVE command:
-                // format leave message with username
-                // set leave status to true
-            // else if SHUTDOWN command:
-                // format shutdown message
-                // set shutdown flag
-            // else if SHUTDOWN_ALL command:
-                // format shutdown all message
-                // set shutdown flag
-            // else (regular message):
-                // if not in leave state, format as note message
-                // else format as skip message
-        
-        // send formatted message to server through socket
-        // check for send errors, exit on failure
-        
-        // if shutdown flag set, exit successfully
-    
-    // return NULL
+extern char *client_name; // declared in main.c
+
+void *sender_handler(void *arg) {
+    int sockfd = *((int *)arg);
+    char input_buffer[1024];
+    char output_buffer[1024];
+    bool shutdown = false;
+    bool leave = false;
+
+    while (1) {
+        printf("Enter message ('JOIN', 'LEAVE', 'SHUTDOWN', 'SHUTDOWN_ALL' or any message): \n");
+        if (fgets(input_buffer, sizeof(input_buffer), stdin) == NULL) {
+            break;
+        }
+        input_buffer[strcspn(input_buffer, "\n")] = 0;
+
+        if (strcmp(input_buffer, "JOIN") == 0) {
+            if (leave) {
+                snprintf(output_buffer, sizeof(output_buffer), "JOIN:%s:%s", client_name, "RE-JOIN");
+                leave = false;
+            } else {
+                snprintf(output_buffer, sizeof(output_buffer), "JOIN:%s", client_name);
+            }
+        } else if (strcmp(input_buffer, "LEAVE") == 0) {
+            snprintf(output_buffer, sizeof(output_buffer), "LEAVE:%s", client_name);
+            leave = true;
+        } else if (strcmp(input_buffer, "SHUTDOWN") == 0) {
+            snprintf(output_buffer, sizeof(output_buffer), "SHUTDOWN:%s", client_name);
+            shutdown = true;
+        } else if (strcmp(input_buffer, "SHUTDOWN_ALL") == 0) {
+            snprintf(output_buffer, sizeof(output_buffer), "SHUTDOWN_ALL:%s", client_name);
+            shutdown = true;
+        } else {
+            if (!leave) {
+                snprintf(output_buffer, sizeof(output_buffer), "NOTE:%s:%s", client_name, input_buffer);
+            } else {
+                snprintf(output_buffer, sizeof(output_buffer), "NOTE:%s:%s", client_name, "SKIP");
+            }
+        }
+
+        if (send(sockfd, output_buffer, strlen(output_buffer), 0) < 0) {
+            perror("send failed");
+            exit(EXIT_FAILURE);
+        }
+
+        if (shutdown)
+            exit(EXIT_SUCCESS);
+    }
+
+    return NULL;
 }
